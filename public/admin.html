@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administratora</title>
+    <link rel="stylesheet" href="admin.css">
+    <script defer src="rezerwacja.js"></script>
+    <script defer src="formularz_wiadomosci.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Panel Administratora</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="admin.html">Zarządzaj Rezerwacjami</a></li>
+                <li><a href="zarzadzaj_wiadomosciami.html">Zarządzaj Wiadomościami</a></li>
+                <li><a href="zarzadzaj_ofertami.html">Zarządzaj Ofertami</a></li>
+                <li><a href="zarzadzaj_uzytkownikami.html">Zarządzaj Użytkownikami</a></li>
+                <li><a href="zarzadzaj_opiniami.html">Zarządzaj Opiniami</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Lista Rezerwacji</h2>
+        <div id="admin-reservation-list">Ładowanie...</div>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const user = await checkSession();
+            if (!user.loggedIn || user.role !== "admin") {
+                alert("Brak uprawnień! Przekierowanie...");
+                window.location.href = "index.html";
+                return;
+            }
+            loadBookings();
+        });
+
+        async function loadBookings() {
+            try {
+                const response = await fetch("http://localhost:3000/api/admin/bookings");
+                if (!response.ok) throw new Error("Błąd serwera: " + response.status);
+
+                const data = await response.json();
+                console.log("📦 Pobranie rezerwacji:", data);
+
+                const list = document.getElementById("admin-reservation-list");
+                list.innerHTML = ""; // Wyczyść poprzednią listę
+
+                data.forEach(reservation => {
+                    const dateFromFormatted = formatDate(reservation.date_from);
+                    const dateToFormatted = formatDate(reservation.date_to);
+
+                    const div = document.createElement("div");
+                    div.classList.add("reservation-item");
+                    div.innerHTML = `
+                        <p><strong>Imię i nazwisko:</strong> <input type="text" value="${reservation.user_name}" id="name-${reservation.id}"></p>
+                        <p><strong>Email:</strong> ${reservation.user_email}</p>
+                        <p><strong>Telefon:</strong> <input type="text" value="${reservation.phone || ''}" id="phone-${reservation.id}"></p>
+                        <p><strong>Domek:</strong> ${reservation.house_id}</p>
+                        <p><strong>Data od:</strong> <input type="date" value="${dateFromFormatted}" id="dateFrom-${reservation.id}"></p>
+                        <p><strong>Data do:</strong> <input type="date" value="${dateToFormatted}" id="dateTo-${reservation.id}"></p>
+                        <p><strong>Kwota do zapłaty:</strong> <input type="number" value="${reservation.amount || ''}" id="amount-${reservation.id}" min="0" step="0.01"> PLN</p>
+                        <button onclick="updateBooking(${reservation.id})">✏️ Edytuj</button>
+                        <button onclick="deleteBooking(${reservation.id})">🗑️ Usuń</button>
+                        <hr>
+                    `;
+                    list.appendChild(div);
+                });
+            } catch (error) {
+                console.error("🚨 Błąd wczytywania rezerwacji:", error);
+                document.getElementById("admin-reservation-list").innerText = "Nie udało się załadować rezerwacji.";
+            }
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        }
+
+        async function checkSession() {
+            try {
+                const response = await fetch("http://localhost:3000/api/session");
+                if (!response.ok) throw new Error("Błąd podczas sprawdzania sesji");
+                
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error("❌ Błąd sprawdzania sesji:", error);
+                return { loggedIn: false };
+            }
+        }
+
+        async function updateBooking(bookingId) {
+            const name = document.getElementById(`name-${bookingId}`).value.trim();
+            const phone = document.getElementById(`phone-${bookingId}`).value.trim();
+            const dateFrom = document.getElementById(`dateFrom-${bookingId}`).value;
+            const dateTo = document.getElementById(`dateTo-${bookingId}`).value;
+            const amount = document.getElementById(`amount-${bookingId}`).value.trim();
+
+            if (!name || !dateFrom || !dateTo || !amount) {
+                alert("⚠ Proszę wypełnić wszystkie pola!");
+                return;
+            }
+
+           
+
+            try {
+                const response = await fetch(`http://localhost:3000/api/admin/bookings/${bookingId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        user_name: name, 
+                        phone, 
+                        date_from: dateFrom, 
+                        date_to: dateTo, 
+                        amount: parseFloat(amount) 
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error("Błąd serwera: " + response.status);
+                }
+
+                alert("✅ Rezerwacja zaktualizowana!");
+                loadBookings();
+            } catch (error) {
+                console.error("❌ Błąd aktualizacji rezerwacji:", error);
+                alert("⚠ Wystąpił błąd aktualizacji.");
+            }
+        }
+
+        async function deleteBooking(bookingId) {
+            if (!confirm("Czy na pewno chcesz usunąć tę rezerwację?")) return;
+
+            try {
+                const response = await fetch(`http://localhost:3000/api/admin/bookings/${bookingId}`, {
+                    method: "DELETE"
+                });
+
+                if (!response.ok) {
+                    throw new Error("Błąd serwera: " + response.status);
+                }
+
+                alert("🗑️ Rezerwacja usunięta!");
+                loadBookings();
+            } catch (error) {
+                console.error("❌ Błąd usuwania rezerwacji:", error);
+                alert("⚠ Wystąpił błąd usuwania.");
+            }
+        }
+    </script>
+</body>
+</html>

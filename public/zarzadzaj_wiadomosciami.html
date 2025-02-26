@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zarządzaj Wiadomościami</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <header>
+        <h1>Panel Administratora</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="admin.html">Zarządzaj Rezerwacjami</a></li>
+                <li><a href="zarzadzaj_wiadomosciami.html">Zarządzaj Wiadomościami</a></li>
+                <li><a href="zarzadzaj_ofertami.html">Zarządzaj Ofertami</a></li>
+                <li><a href="zarzadzaj_uzytkownikami.html">Zarządzaj Użytkownikami</a></li>
+                <li><a href="zarzadzaj_opiniami.html">Zarządzaj Opiniami</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Lista Wiadomości</h2>
+        <div id="messages-list">Ładowanie...</div>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const user = await checkSession();
+            if (!user.loggedIn || user.role !== "admin") {
+                alert("Brak uprawnień! Przekierowanie...");
+                window.location.href = "index.html";
+                return;
+            }
+            loadMessages();
+        });
+
+        
+
+        async function loadMessages() {
+    try {
+        const response = await fetch("http://localhost:3000/api/admin/messages", {
+            method: "GET",
+            credentials: "include"  // Wysyłanie sesji (ciasteczek)
+        });
+
+        if (!response.ok) {
+            throw new Error("Błąd serwera: " + response.status);
+        }
+
+        const data = await response.json();
+        console.log("📥 Pobranie wiadomości:", data);
+        
+        const list = document.getElementById("messages-list");
+        list.innerHTML = "";
+        
+        data.forEach(msg => {
+            const div = document.createElement("div");
+            div.classList.add("message-item");
+            div.innerHTML = `
+                <p><strong>Imię i nazwisko:</strong> ${msg.name}</p>
+                <p><strong>Email:</strong> ${msg.email}</p>
+                <p><strong>Wiadomość:</strong> ${msg.message}</p>
+                <p><strong>Data:</strong> ${new Date(msg.created_at).toLocaleString()}</p>
+                <button onclick="deleteMessage(${msg.id})">🗑️ Usuń</button>
+                <hr>
+            `;
+            list.appendChild(div);
+        });
+    } catch (error) {
+        console.error("🚨 Błąd wczytywania wiadomości:", error);
+        document.getElementById("messages-list").innerText = "Nie udało się załadować wiadomości.";
+    }
+}
+
+
+        async function deleteMessage(messageId) {
+            if (!confirm("Czy na pewno chcesz usunąć tę wiadomość?")) return;
+
+            try {
+                const response = await fetch(`http://localhost:3000/api/admin/messages/${messageId}`, {
+                    method: "DELETE"
+                });
+
+                if (!response.ok) {
+                    throw new Error("Błąd serwera: " + response.status);
+                }
+                
+                alert("🗑️ Wiadomość usunięta!");
+                loadMessages();
+            } catch (error) {
+                console.error("❌ Błąd usuwania wiadomości:", error);
+                alert("⚠ Wystąpił błąd usuwania.");
+            }
+        }
+        async function checkSession() {
+    try {
+        const response = await fetch("http://localhost:3000/api/session");
+        if (!response.ok) throw new Error("Błąd podczas sprawdzania sesji");
+        
+        const data = await response.json();
+        console.log("ℹ️ Dane sesji:", data); // Dodane logowanie
+
+        return data;
+    } catch (error) {
+        console.error("❌ Błąd sprawdzania sesji:", error);
+        return { loggedIn: false };
+    }
+}
+
+    </script>
+</body>
+</html>

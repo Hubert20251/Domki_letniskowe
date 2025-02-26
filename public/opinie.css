@@ -1,0 +1,145 @@
+#opinie {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Nagłówki */
+#opinie h2, #opinie h3 {
+    text-align: center;
+    color: #333;
+}
+
+/* Lista opinii */
+#opinie-lista {
+    margin-top: 20px;
+    padding: 10px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Pojedyncza opinia */
+.opinia {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    font-size: 16px;
+}
+.opinia:last-child {
+    border-bottom: none;
+}
+
+/* Gwiazdki ocen */
+.rating {
+    display: flex;
+    justify-content: center;
+    font-size: 30px;
+    margin-bottom: 10px;
+}
+
+.star {
+    cursor: pointer;
+    transition: color 0.3s, transform 0.2s;
+}
+.star:hover {
+    transform: scale(1.2);
+}
+.star.selected {
+    color: gold;
+}
+
+/* Pole tekstowe do opinii */
+#opinia-text {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    resize: vertical;
+}
+
+/* Przycisk wysyłania opinii */
+#wyslij-opinie {
+    width: 100%;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border: none;
+    padding: 14px;
+    font-size: 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+#wyslij-opinie:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
+}
+
+/* Sekcja średniej oceny */
+#srednia-ocena {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Responsywność */
+@media (max-width: 600px) {
+    #opinie {
+        width: 90%;
+        padding: 15px;
+    }
+    .rating {
+        font-size: 24px;
+    }
+    #opinia-text {
+        font-size: 14px;
+    }
+}
+
+
+
+.opinia-data {
+    font-size: 14px;
+    color: #666;
+    margin-top: 5px;
+}
+
+
+
+/* Kontener opinii - umożliwiamy przewijanie */
+#opinie-container {
+    max-width: 800px;
+    max-height: 400px; /* Ograniczamy wysokość, aby wymusić przewijanie */
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 10px;
+    background: #f9f9f9;
+}
+
+/* Opinie - formatowanie */
+.opinia {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+.opinia:last-child {
+    border-bottom: none;
+}
+
+/* Pomniejszone zdjęcie */
+.opinia-img {
+    width: 100px;
+    height: auto;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.opinia-img:hover {
+    transform: scale(1.1);
+}

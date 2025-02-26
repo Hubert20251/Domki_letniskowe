@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oferta - Domki Letniskowe</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="script.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    
+</head>
+<body>
+    <header>
+        <h1>Domki Letniskowe</h1>
+        <nav class="navbar">
+            <div class="menu-toggle" onclick="toggleMenu()">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="oferta.html">Oferta</a></li>
+                <li><a href="galeria.html">Galeria</a></li>
+                <li><a href="onas.html">O nas</a></li>
+                <li><a href="kontakt.html">Kontakt</a></li>
+                <li id="reservations-link" style="display: none;"><a href="rezerwacje.html">Moje Rezerwacje</a></li>
+            </ul>
+            <div class="social-icons">
+                <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i></a>
+                        <a href="https://twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
+                        <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
+                    </div>
+        </nav>
+    </header>
+    <main>
+        <main>
+
+            <section id="auth-container">
+                <div id="auth-section">
+                    <button id="showLogin">Zaloguj</button>
+                    <form id="loginForm" style="display: none;">
+                        <input type="email" id="email" placeholder="Email" required>
+                        <input type="password" id="password" placeholder="Hasło" required>
+                        <button type="submit">Zaloguj</button>
+                    </form>
+                    <button id="showRegister">Zarejestruj</button>
+                    <form id="registerForm" style="display: none;">
+                        <button type="submit">Zarejestruj</button>
+                    </form>
+                    <button id="logoutButton" style="display:none;">Wyloguj</button>
+                    <p id="status"></p>
+                </div>
+            </section>
+          
+            
+
+
+
+
+        <section class="offer-container">
+            <div class="main-title">
+                Nasza oferta
+            </div>
+            <p>Wybierz idealny domek letniskowy dla siebie i ciesz się wyjątkowym wypoczynkiem.</p>
+            <div id="houses-list">
+                <article class="house">
+                    <img src="zdjecia/domek.jpg" alt="Domek #1">
+                    <h2>Domek #1</h2>
+                    <p>Przestronny domek dla 4 osób z łazienką i aneksem kuchennym.</p>
+                    <ul>
+                        <li>Powierzchnia: 40m²</li>
+                        <li>2 sypialnie, 1 łazienka</li>
+                        <li>Pełne wyposażenie kuchni</li>
+                        <li>Bezpłatne Wi-Fi</li>
+                    </ul>
+                    <p class="price">Cena: 200 zł/noc</p>
+                    
+                </article>
+                <article class="house">
+                    <img src="zdjecia/domek.jpg" alt="Domek #2">
+                    <h2>Domek #2</h2>
+                    <p>Ekskluzywny domek dla 6 osób z tarasem i widokiem na jezioro.</p>
+                    <ul>
+                        <li>Powierzchnia: 60m²</li>
+                        <li>3 sypialnie, 2 łazienki</li>
+                        <li>Duży taras z widokiem</li>
+                        <li>Klimatyzacja i kominek</li>
+                    </ul>
+                    <p class="price">Cena: 350 zł/noc</p>
+                    
+                </article>
+                <article class="house">
+                    <img src="zdjecia/domek.jpg" alt="Domek #3">
+                    <h2>Domek #3</h2>
+                    <p>Luksusowy domek dla 8 osób z jacuzzi i sauną.</p>
+                    <ul>
+                        <li>Powierzchnia: 80m²</li>
+                        <li>4 sypialnie, 2 łazienki</li>
+                        <li>Jacuzzi, sauna i taras</li>
+                        <li>Smart TV i system audio</li>
+                    </ul>
+                    <p class="price">Cena: 500 zł/noc</p>
+                    
+                </article>
+                <article class="house">
+                    <img src="zdjecia/domek.jpg" alt="Domek #4">
+                    <h2>Domek #4</h2>
+                    <p>Luksusowy domek dla 8 osób z jacuzzi i sauną.</p>
+                    <ul>
+                        <li>Powierzchnia: 80m²</li>
+                        <li>4 sypialnie, 2 łazienki</li>
+                        <li>Jacuzzi, sauna i taras</li>
+                        <li>Smart TV i system audio</li>
+                    </ul>
+                    <p class="price">Cena: 500 zł/noc</p>
+                    
+                </article>
+                <article class="house">
+                    <img src="zdjecia/domek.jpg" alt="Domek #5">
+                    <h2>Domek #5</h2>
+                    <p>Luksusowy domek dla 8 osób z jacuzzi i sauną.</p>
+                    <ul>
+                        <li>Powierzchnia: 80m²</li>
+                        <li>4 sypialnie, 2 łazienki</li>
+                        <li>Jacuzzi, sauna i taras</li>
+                        <li>Smart TV i system audio</li>
+                    </ul>
+                    <p class="price">Cena: 500 zł/noc</p>
+                    
+                </article>
+                <article class="house">
+                    <img src="zdjecia/domek.jpg" alt="Domek #6">
+                    <h2>Domek #6</h2>
+                    <p>Luksusowy domek dla 8 osób z jacuzzi i sauną.</p>
+                    <ul>
+                        <li>Powierzchnia: 80m²</li>
+                        <li>4 sypialnie, 2 łazienki</li>
+                        <li>Jacuzzi, sauna i taras</li>
+                        <li>Smart TV i system audio</li>
+                    </ul>
+                    <p class="price">Cena: 500 zł/noc</p>
+                    
+                </article>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>Kontakt</h3>
+                <p>Telefon: +48 123 456 789</p>
+                <p>Email: kontakt@domkiletniskowe.pl</p>
+                <p>Adres: ul. Letnia 15, 80-200 Gdańsk</p>
+            </div>
+            <div class="footer-section">
+                <h3>Media Społecznościowe</h3>
+                <p><a href="https://www.facebook.com/">Facebook</a> | <a href="#">Instagram</a> | <a href="#">Twitter</a></p>
+            </div>
+            <div class="footer-section">
+                <h3>Godziny otwarcia</h3>
+                <p>Pon - Pt: 9:00 - 18:00</p>
+                <p>Sob - Nd: 10:00 - 16:00</p>
+            </div>
+        </div>
+        <p class="footer-copy">&copy; 2025 Domki Letniskowe. Wszelkie prawa zastrzeżone.</p>
+    </footer>
+</body>
+</html>

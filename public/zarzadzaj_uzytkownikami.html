@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zarządzaj Użytkownikami</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <header>
+        <h1>Panel Administratora</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="admin.html">Zarządzaj Rezerwacjami</a></li>
+                <li><a href="zarzadzaj_wiadomosciami.html">Zarządzaj Wiadomościami</a></li>
+                <li><a href="zarzadzaj_ofertami.html">Zarządzaj Ofertami</a></li>
+                <li><a href="zarzadzaj_uzytkownikami.html">Zarządzaj Użytkownikami</a></li>
+                <li><a href="zarzadzaj_opiniami.html">Zarządzaj Opiniami</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Lista Użytkowników</h2>
+        <div id="users-list">Ładowanie...</div>
+
+        <h2>Dodaj Nowego Użytkownika</h2>
+        <form id="add-user-form">
+            <label>Imię: <input type="text" id="user-name" required></label><br>
+            <label>Email: <input type="email" id="user-email" required></label><br>
+            <label>Hasło: <input type="password" id="user-password" required></label><br>
+            <label>Rola:
+                <select id="user-role" required>
+                    <option value="user">Użytkownik</option>
+                    <option value="admin">Administrator</option>
+                </select>
+            </label><br>
+            <button type="submit">➕ Dodaj Użytkownika</button>
+        </form>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const user = await checkSession();
+            if (!user.loggedIn || user.role !== "admin") {
+                alert("Brak uprawnień! Przekierowanie...");
+                window.location.href = "index.html";
+                return;
+            }
+            loadUsers();
+        });
+
+        async function checkSession() {
+            try {
+                const response = await fetch("http://localhost:3000/api/session");
+                if (!response.ok) throw new Error("Błąd podczas sprawdzania sesji");
+                return await response.json();
+            } catch (error) {
+                console.error("❌ Błąd sprawdzania sesji:", error);
+                return { loggedIn: false };
+            }
+        }
+
+        async function loadUsers() {
+            try {
+                const response = await fetch("http://localhost:3000/api/admin/users", {
+                    method: "GET",
+                    credentials: "include"
+                });
+
+                if (!response.ok) throw new Error("Błąd serwera: " + response.status);
+
+                const data = await response.json();
+                console.log("📥 Pobranie użytkowników:", data);
+                
+                const list = document.getElementById("users-list");
+                list.innerHTML = "";
+                
+                data.forEach(user => {
+                    const div = document.createElement("div");
+                    div.classList.add("user-item");
+                    div.innerHTML = `
+                        <p><strong>Imię:</strong> ${user.name}</p>
+                        <p><strong>Email:</strong> ${user.email}</p>
+                        <p><strong>Rola:</strong> ${user.role}</p>
+                        <button onclick="editUser(${user.id})">✏️ Edytuj</button>
+                        <button onclick="deleteUser(${user.id})">🗑️ Usuń</button>
+                        <hr>
+                    `;
+                    list.appendChild(div);
+                });
+            } catch (error) {
+                console.error("🚨 Błąd wczytywania użytkowników:", error);
+                document.getElementById("users-list").innerText = "Nie udało się załadować użytkowników.";
+            }
+        }
+
+        document.getElementById("add-user-form").addEventListener("submit", async (event) => {
+            event.preventDefault();
+            
+            const name = document.getElementById("user-name").value;
+            const email = document.getElementById("user-email").value;
+            const password = document.getElementById("user-password").value;
+            const role = document.getElementById("user-role").value;
+            
+            try {
+                const response = await fetch("http://localhost:3000/api/admin/users", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name, email, password, role })
+                });
+
+                if (!response.ok) throw new Error("Błąd serwera: " + response.status);
+                
+                alert("✅ Użytkownik dodany!");
+                document.getElementById("add-user-form").reset();
+                loadUsers();
+            } catch (error) {
+                console.error("❌ Błąd dodawania użytkownika:", error);
+                alert("⚠ Wystąpił błąd.");
+            }
+        });
+
+        async function editUser(userId) {
+            const newName = prompt("Podaj nowe imię:");
+            const newRole = prompt("Podaj nową rolę (user/admin):");
+            if (!newName || !newRole) {
+                alert("Wszystkie pola muszą być uzupełnione!");
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:3000/api/admin/users/${userId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name: newName, role: newRole })
+                });
+
+                if (!response.ok) throw new Error("Błąd serwera: " + response.status);
+                
+                alert("✏️ Użytkownik zaktualizowany!");
+                loadUsers();
+            } catch (error) {
+                console.error("❌ Błąd edycji użytkownika:", error);
+                alert("⚠ Wystąpił błąd edycji.");
+            }
+        }
+
+        async function deleteUser(userId) {
+            if (!confirm("Czy na pewno chcesz usunąć tego użytkownika?")) return;
+
+            try {
+                const response = await fetch(`http://localhost:3000/api/admin/users/${userId}`, {
+                    method: "DELETE"
+                });
+
+                if (!response.ok) throw new Error("Błąd serwera: " + response.status);
+                
+                alert("🗑️ Użytkownik usunięty!");
+                loadUsers();
+            } catch (error) {
+                console.error("❌ Błąd usuwania użytkownika:", error);
+                alert("⚠ Wystąpił błąd usuwania.");
+            }
+        }
+    </script>
+</body>
+</html>

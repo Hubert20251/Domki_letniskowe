@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zarządzaj Opiniami</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <header>
+        <h1>Panel Administratora</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="admin.html">Zarządzaj Rezerwacjami</a></li>
+                <li><a href="zarzadzaj_wiadomosciami.html">Zarządzaj Wiadomościami</a></li>
+                <li><a href="zarzadzaj_ofertami.html">Zarządzaj Ofertami</a></li>
+                <li><a href="zarzadzaj_uzytkownikami.html">Zarządzaj Użytkownikami</a></li>
+                <li><a href="zarzadzaj_opiniami.html">Zarządzaj Opiniami</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Lista Opinii</h2>
+        <div id="opinie-list">Ładowanie...</div>
+    </main>
+
+    <!-- Modal do edycji opinii -->
+    <div id="editModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Edytuj Opinię</h2>
+            <form id="editForm">
+                <label for="newContent">Treść:</label>
+                <textarea id="newContent" required></textarea>
+                
+                <label for="newRating">Ocena (1-5):</label>
+                <input type="number" id="newRating" min="1" max="5" required>
+                
+                <label for="newImages">Dodaj zdjęcia:</label>
+                <input type="file" id="newImages" multiple accept="image/*">
+                
+                <input type="hidden" id="editOpiniaId">
+                <button type="submit">Zapisz</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            loadOpinie();
+        });
+
+        async function loadOpinie() {
+            const response = await fetch("http://localhost:3000/api/admin/opinie", { credentials: "include" });
+            const data = await response.json();
+            
+            const list = document.getElementById("opinie-list");
+            list.innerHTML = "";
+
+            data.forEach(opinia => {
+                const div = document.createElement("div");
+                div.classList.add("opinia-item");
+                div.innerHTML = `
+                    <p><strong>${opinia.user_name}</strong>: ${opinia.content} (${opinia.rating} ★)</p>
+                    <button onclick="openModal(${opinia.id}, '${opinia.content}', ${opinia.rating})">✏️ Edytuj</button>
+                    <button onclick="deleteOpinia(${opinia.id})">🗑️ Usuń</button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function openModal(id, content, rating) {
+            document.getElementById("editOpiniaId").value = id;
+            document.getElementById("newContent").value = content;
+            document.getElementById("newRating").value = rating;
+            document.getElementById("editModal").style.display = "block";
+        }
+
+        function closeModal() {
+            document.getElementById("editModal").style.display = "none";
+        }
+
+        document.getElementById("editForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const opiniaId = document.getElementById("editOpiniaId").value;
+            const content = document.getElementById("newContent").value;
+            const rating = document.getElementById("newRating").value;
+            const formData = new FormData();
+
+            formData.append("content", content);
+            formData.append("rating", rating);
+            
+            const files = document.getElementById("newImages").files;
+            for (const file of files) {
+                formData.append("images", file);
+            }
+
+            await fetch(`http://localhost:3000/api/admin/opinie/${opiniaId}`, {
+                method: "PUT",
+                body: formData
+            });
+
+            alert("Opinia zaktualizowana!");
+            closeModal();
+            loadOpinie();
+        });
+
+        async function deleteOpinia(opiniaId) {
+            if (!confirm("Czy na pewno chcesz usunąć tę opinię?")) return;
+            await fetch(`http://localhost:3000/api/admin/opinie/${opiniaId}`, { method: "DELETE" });
+            alert("Opinia usunięta!");
+            loadOpinie();
+        }
+    </script>
+</body>
+</html>

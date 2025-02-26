@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zarządzaj Ofertami</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <header>
+        <h1>Panel Administratora</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="admin.html">Zarządzaj Rezerwacjami</a></li>
+                <li><a href="zarzadzaj_wiadomosciami.html">Zarządzaj Wiadomościami</a></li>
+                <li><a href="zarzadzaj_ofertami.html">Zarządzaj Ofertami</a></li>
+                <li><a href="zarzadzaj_uzytkownikami.html">Zarządzaj Użytkownikami</a></li>
+                <li><a href="zarzadzaj_opiniami.html">Zarządzaj Opiniami</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Lista Ofert</h2>
+        <div id="houses-list">Ładowanie...</div>
+
+        <h2>Dodaj Nową Ofertę</h2>
+        <form id="add-house-form" enctype="multipart/form-data">
+            <label>Nazwa: <input type="text" id="house-name" required></label><br>
+            <label>Opis: <textarea id="house-description" required></textarea></label><br>
+            <label>Cena (PLN/noc): <input type="number" id="house-price" required></label><br>
+            <label>Zdjęcie: <input type="file" id="house-image" accept="image/*" required></label><br>
+            <button type="submit">➕ Dodaj Ofertę</button>
+        </form>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const user = await checkSession();
+            if (!user.loggedIn || user.role !== "admin") {
+                alert("Brak uprawnień! Przekierowanie...");
+                window.location.href = "index.html";
+                return;
+            }
+            loadHouses();
+        });
+
+        async function checkSession() {
+            try {
+                const response = await fetch("http://localhost:3000/api/session");
+                if (!response.ok) throw new Error("Błąd podczas sprawdzania sesji");
+                return await response.json();
+            } catch (error) {
+                console.error("❌ Błąd sprawdzania sesji:", error);
+                return { loggedIn: false };
+            }
+        }
+
+        async function loadHouses() {
+            try {
+                const response = await fetch("http://localhost:3000/api/admin/houses", {
+                    method: "GET",
+                    credentials: "include"
+                });
+                if (!response.ok) throw new Error("Błąd serwera: " + response.status);
+                const data = await response.json();
+                
+                const list = document.getElementById("houses-list");
+                list.innerHTML = "";
+                
+                data.forEach(house => {
+                    const div = document.createElement("div");
+                    div.classList.add("house-item");
+                    div.innerHTML = `
+                        <p><strong>Nazwa:</strong> ${house.name}</p>
+                        <p><strong>Opis:</strong> ${house.description}</p>
+                        <p><strong>Cena:</strong> ${house.price} PLN/noc</p>
+                        <img src="${house.imageUrl}" alt="Zdjęcie oferty" style="width:200px; height:auto;">
+                        <button onclick="editHouse(${house.id})">✏️ Edytuj</button>
+                        <button onclick="deleteHouse(${house.id})">🗑️ Usuń</button>
+                        <hr>
+                    `;
+                    list.appendChild(div);
+                });
+            } catch (error) {
+                console.error("🚨 Błąd wczytywania ofert:", error);
+                document.getElementById("houses-list").innerText = "Nie udało się załadować ofert.";
+            }
+        }
+
+        document.getElementById("add-house-form").addEventListener("submit", async (event) => {
+            event.preventDefault();
+            
+            const formData = new FormData();
+            formData.append("name", document.getElementById("house-name").value);
+            formData.append("description", document.getElementById("house-description").value);
+            formData.append("price", document.getElementById("house-price").value);
+            formData.append("image", document.getElementById("house-image").files[0]);
+            
+            try {
+                const response = await fetch("http://localhost:3000/api/admin/houses", {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error("Błąd serwera: " + response.status);
+                
+                alert("✅ Oferta dodana!");
+                document.getElementById("add-house-form").reset();
+                loadHouses();
+            } catch (error) {
+                console.error("❌ Błąd dodawania oferty:", error);
+                alert("⚠ Wystąpił błąd.");
+            }
+        });
+
+
+
+
+
+
+        async function editHouse(houseId) {
+    const newName = prompt("Podaj nową nazwę:");
+    const newDescription = prompt("Podaj nowy opis:");
+    const newPrice = prompt("Podaj nową cenę:");
+    const newImage = confirm("Czy chcesz zmienić zdjęcie?");
+
+    if (!newName || !newDescription || !newPrice) {
+        alert("Wszystkie pola muszą być uzupełnione!");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("name", newName);
+    formData.append("description", newDescription);
+    formData.append("price", newPrice);
+
+    if (newImage) {
+        const fileInput = document.createElement("input");
+        fileInput.type = "file";
+        fileInput.accept = "image/*";
+
+        fileInput.addEventListener("change", async () => {
+            const file = fileInput.files[0];
+            if (file) {
+                formData.append("image", file);
+
+                try {
+                    const response = await fetch(`http://localhost:3000/api/admin/houses/${houseId}`, {
+                        method: "PUT",
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        throw new Error("Błąd serwera: " + response.status);
+                    }
+
+                    alert("✏️ Oferta zaktualizowana!");
+                    loadHouses();
+                } catch (error) {
+                    console.error("❌ Błąd edycji oferty:", error);
+                    alert("⚠ Wystąpił błąd edycji.");
+                }
+            }
+        });
+
+        fileInput.click(); // Uruchamiamy wybór pliku
+    } else {
+        try {
+            const response = await fetch(`http://localhost:3000/api/admin/houses/${houseId}`, {
+                method: "PUT",
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error("Błąd serwera: " + response.status);
+            }
+
+            alert("✏️ Oferta zaktualizowana!");
+            loadHouses();
+        } catch (error) {
+            console.error("❌ Błąd edycji oferty:", error);
+            alert("⚠ Wystąpił błąd edycji.");
+        }
+    }
+}
+
+
+
+        async function deleteHouse(houseId) {
+            if (!confirm("Czy na pewno chcesz usunąć tę ofertę?")) return;
+
+            try {
+                const response = await fetch(`http://localhost:3000/api/admin/houses/${houseId}`, {
+                    method: "DELETE"
+                });
+
+                if (!response.ok) {
+                    throw new Error("Błąd serwera: " + response.status);
+                }
+                
+                alert("🗑️ Oferta usunięta!");
+                loadHouses();
+            } catch (error) {
+                console.error("❌ Błąd usuwania oferty:", error);
+                alert("⚠ Wystąpił błąd usuwania.");
+            }
+        }
+
+ 
+
+
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moje Rezerwacje</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="rezerwacja.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+</head>
+<body>
+    <header>
+        <h1>Moje Rezerwacje</h1>
+        <nav class="navbar">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="oferta.html">Oferta</a></li>
+                <li><a href="galeria.html">Galeria</a></li>
+                <li><a href="onas.html">O nas</a></li>
+                <li><a href="kontakt.html">Kontakt</a></li>
+                <li><a href="rezerwacje.html">Moje Rezerwacje</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        
+
+
+
+
+
+        <div class="main-title">
+            Twoje rezerwacje
+        </div>
+        <div id="reservation-list">Ładowanie...</div>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+    console.log("🔵 Skrypt rezerwacji działa.");
+
+    const user = await checkSession();
+    if (!user.loggedIn) {
+        alert("Musisz być zalogowany.");
+        window.location.href = "index.html";
+        return;
+    }
+
+    console.log("👤 Zalogowany użytkownik:", user.email);
+
+    const list = document.getElementById("reservation-list");
+    if (!list) {
+        console.error("❌ Brak elementu #reservation-list w HTML.");
+        return;
+    }
+
+    list.innerHTML = "Ładowanie rezerwacji...";
+
+    try {
+        const response = await fetch(`http://localhost:3000/api/bookings?user_email=${user.email}`);
+        const data = await response.json();
+
+        console.log("📄 Otrzymane dane z API:", data);
+
+        if (data.length === 0) {
+            list.innerHTML = "<p>Brak rezerwacji.</p>";
+            return;
+        }
+
+        list.innerHTML = ""; // Wyczyść listę
+        data.forEach(reservation => {
+            const div = document.createElement("div");
+            div.classList.add("reservation-item");
+
+            div.innerHTML = `
+                <p><strong>Imię i nazwisko:</strong> ${reservation.user_name}</p>
+                <p><strong>Domek:</strong> ${reservation.house_id}</p>
+                <p><strong>Data od:</strong> ${reservation.date_from}</p>
+                <p><strong>Data do:</strong> ${reservation.date_to}</p>
+                <p><strong>Numer telefonu:</strong> ${reservation.phone ? reservation.phone : 'Brak danych'}</p>
+                <p><strong>Kwota:</strong> ${reservation.amount ? reservation.amount + ' PLN' : 'Brak danych'}</p>
+                <button class="pdf-button" data-id="${reservation.house_id}" 
+                        data-name="${reservation.user_name}" 
+                        data-datefrom="${reservation.date_from}" 
+                        data-dateto="${reservation.date_to}" 
+                        data-phone="${reservation.phone}" 
+                        data-amount="${reservation.amount}">
+                    📄 Pobierz potwierdzenie PDF
+                </button>
+                <hr>
+            `;
+            list.appendChild(div);
+        });
+
+        // Obsługa generowania PDF dla każdej rezerwacji
+        document.querySelectorAll(".pdf-button").forEach(button => {
+            button.addEventListener("click", (event) => {
+                const target = event.target;
+                generatePDF({
+                    house_id: target.dataset.id,
+                    user_name: target.dataset.name,
+                    date_from: target.dataset.datefrom,
+                    date_to: target.dataset.dateto,
+                    phone: target.dataset.phone,
+                    amount: target.dataset.amount
+                });
+            });
+        });
+
+    } catch (error) {
+        console.error("❌ Błąd ładowania rezerwacji:", error);
+        list.innerHTML = "<p>Błąd ładowania danych.</p>";
+    }
+});
+
+
+        async function checkSession() {
+            try {
+                const response = await fetch("http://localhost:3000/api/session");
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error("❌ Błąd sprawdzania sesji:", error);
+                return { loggedIn: false };
+            }
+        }
+
+
+
+
+        function generatePDF(reservation) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  // Ustawienie tła
+  doc.setFillColor(0, 102, 204); // Kolor tła (niebieski)
+  doc.rect(0, 0, doc.internal.pageSize.width, 40, 'F'); // Prostokąt tła na górze strony
+
+  // Nagłówek
+  doc.setFont("Arial", "bold");
+  doc.setFontSize(22);
+  doc.setTextColor(255, 255, 255); // Kolor tekstu na nagłówku (biały)
+  doc.text("Potwierdzenie Rezerwacji", 20, 25);
+
+  // Przywracamy kolor czarny do tekstu
+  doc.setTextColor(0, 0, 0);
+
+  // Zwiększenie odstępów między liniami
+  doc.setFontSize(12);
+  doc.setFont("Arial", "normal");
+
+  // Wstawianie danych (usuwamy polskie litery)
+  doc.text(`Imie i nazwisko: ${reservation.user_name}`, 20, 50);
+  doc.text(`Domek: ${reservation.house_id}`, 20, 60);
+  doc.text(`Data od: ${reservation.date_from}`, 20, 70);
+  doc.text(`Data do: ${reservation.date_to}`, 20, 80);
+  doc.text(`Telefon: ${reservation.phone ? reservation.phone : 'Brak danych'}`, 20, 90);
+  doc.text(`Kwota: ${reservation.amount ? reservation.amount + ' PLN' : 'Brak danych'}`, 20, 100);
+
+  // Dodanie podziękowania (usuwamy polskie litery)
+  doc.setFontSize(14);
+  doc.setFont("Arial", "italic");
+  doc.text("Dziekujemy za rezerwacje!", 20, 120);
+
+  // Informacja o płatności i kontakcie
+  doc.setFontSize(12);
+  doc.setFont("Arial", "normal");
+  doc.text("Platnosc bedzie odbywac sie poprzez przelew bankowy lub platnosc gotowka na miejscu.", 20, 135);
+  doc.text("Niezwlocznie po wplywie rezerwacji skontaktujemy sie z Panstwem w celu dogadania szczegolow.", 20, 145);
+
+  // Informacja o rejestracji
+  doc.text("Przy rejestracji w naszym osrodku prosimy miec potwierdzenie w formie elektronicznej lub fizycznej.", 20, 155);
+
+  // Dodanie linii oddzielającej sekcję z danymi
+  doc.setDrawColor(0, 0, 0); // Czarny kolor linii
+  doc.line(20, 165, doc.internal.pageSize.width - 20, 165); // Linia pozioma
+
+  // Generowanie i pobieranie pliku PDF
+  doc.save(`Potwierdzenie_Rezerwacji_${reservation.house_id}.pdf`);
+}
+
+
+
+
+
+    </script>
+</body>
+</html>
