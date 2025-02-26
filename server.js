@@ -846,9 +846,11 @@ app.delete("/api/admin/opinie/:id", (req, res) => {
 
 
 // 📌 Uruchomienie serwera
-app.listen(3000, () => {
-    console.log('🚀 Serwer działa na http://localhost:3000');
+const port = process.env.PORT || 3000;  // Używamy zmiennej środowiskowej PORT, jeśli jest dostępna
+app.listen(port, () => {
+    console.log(`🚀 Serwer działa na porcie ${port}`);
 });
+
 
 
 
