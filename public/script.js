@@ -396,7 +396,7 @@ function selectStar(event) {
 }
 
 async function pobierzOpinie() {
-    const response = await fetch("https://domki-letniskowe.onrender.com//api/opinie");
+    const response = await fetch("https://domki-letniskowe.onrender.com/api/opinie");
     const opinie = await response.json();
     const opinieLista = document.getElementById("opinie-lista");
     opinieLista.innerHTML = "";
