@@ -396,7 +396,7 @@ function selectStar(event) {
 }
 
 async function pobierzOpinie() {
-    const response = await fetch("http://localhost:3000/api/opinie");
+    const response = await fetch("https://domki-letniskowe.onrender.com//api/opinie");
     const opinie = await response.json();
     const opinieLista = document.getElementById("opinie-lista");
     opinieLista.innerHTML = "";
@@ -455,7 +455,7 @@ function closeModal() {
 }
 
 async function pobierzSredniaOcene() {
-    const response = await fetch("http://localhost:3000/api/opinie/srednia");
+    const response = await fetch("https://domki-letniskowe.onrender.com/api/opinie/srednia");
     const data = await response.json();
     const sredniaOcena = (typeof data.srednia === "number" && !isNaN(data.srednia)) ? data.srednia : 0;
     document.getElementById("avg-rating").innerText = sredniaOcena.toFixed(1);
@@ -493,7 +493,7 @@ document.getElementById("wyslij-opinie").addEventListener("click", async () => {
         formData.append("images", file);
     }
 
-    const response = await fetch("http://localhost:3000/api/opinie", {
+    const response = await fetch("https://domki-letniskowe.onrender.com/api/opinie", {
         method: "POST",
         body: formData
     });
