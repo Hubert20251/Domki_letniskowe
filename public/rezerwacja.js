@@ -13,7 +13,7 @@ async function fetchHouses() {
     }
 
     try {
-        const response = await fetch("http://localhost:3000/api/houses");
+        const response = await fetch("https://domki-letniskowe.onrender.com//api/houses");
         const data = await response.json();
 
         const uniqueHouses = [...new Map(data.map(house => [house.id, house])).values()];
@@ -64,7 +64,7 @@ async function fetchHouses() {
 
 async function makeReservation(houseId, user_name, user_email, phone, dateFrom, dateTo, amount) {
     try {
-        const response = await fetch("http://localhost:3000/api/book", {
+        const response = await fetch("https://domki-letniskowe.onrender.com/api/book", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ house_id: houseId, user_name, user_email, phone, date_from: dateFrom, date_to: dateTo, amount })
@@ -92,7 +92,7 @@ async function showReservationForm(houseId) {
         return;
     }
 
-    const houseData = await fetch(`http://localhost:3000/api/houses`);
+    const houseData = await fetch(`https://domki-letniskowe.onrender.com/api/houses`);
     const houses = await houseData.json();
     const house = houses.find(h => h.id == houseId);
     if (!house) {
