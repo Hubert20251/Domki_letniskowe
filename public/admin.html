@@ -109,7 +109,7 @@
            
 
             try {
-                const response = await fetch(`http://localhost:3000/api/admin/bookings/${bookingId}`, {
+                const response = await fetch(`https://domki-letniskowe.onrender.com//api/admin/bookings/${bookingId}`, {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ 
