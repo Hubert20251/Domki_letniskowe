@@ -9,6 +9,7 @@
     <script defer src="formularz_wiadomosci.js"></script>
     <script defer src="script.js"></script>
     <script defer src="rezerwacja.js"></script>
+    <script defer src="opinie.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 </head>
 <body>
@@ -79,8 +80,9 @@
                         <label for="name">Imię i nazwisko</label>
                         <input type="text" id="name" name="name" placeholder="Wpisz swoje imię" required>
                         
-                        <label for="email">Adres email</label>
-                        <input type="email" id="email" name="email" placeholder="Wpisz swój email" required>
+                        <label for="contactEmail">Adres email</label>
+<input type="text" id="contactEmail" name="email" placeholder="Wpisz swój email" required>
+
                         
                         <label for="message">Twoja wiadomość</label>
                         <textarea id="message" name="message" placeholder="Napisz swoją wiadomość..." required></textarea>
@@ -98,23 +100,21 @@
                 <div id="opinie-lista"></div>
             </div>
         
-            <div id="dodaj-opinie">
-                <h3>Dodaj swoją opinię</h3>
-                <div class="rating">
-                    <span class="star" data-value="1">&#9733;</span>
-                    <span class="star" data-value="2">&#9733;</span>
-                    <span class="star" data-value="3">&#9733;</span>
-                    <span class="star" data-value="4">&#9733;</span>
-                    <span class="star" data-value="5">&#9733;</span>
-                </div>
-                <textarea id="opinia-text" placeholder="Napisz swoją opinię..." required></textarea>
-            
-                <label for="opinia-image">Dodaj zdjęcie (opcjonalnie):</label>
-                <input type="file" id="opinia-image" accept="image/*" multiple>
-
-            
-                <button id="wyslij-opinie">Wyślij</button>
-            </div>
+            <button id="pokaz-formularz-opinii">Dodaj opinię</button>
+<div id="dodaj-opinie" style="display: none;">
+    <h3>Dodaj swoją opinię</h3>
+    <div class="rating">
+        <span class="star" data-value="1">&#9733;</span>
+        <span class="star" data-value="2">&#9733;</span>
+        <span class="star" data-value="3">&#9733;</span>
+        <span class="star" data-value="4">&#9733;</span>
+        <span class="star" data-value="5">&#9733;</span>
+    </div>
+    <textarea id="opinia-text" placeholder="Napisz swoją opinię..." required></textarea>
+    <label for="opinia-image">Dodaj zdjęcie (opcjonalnie):</label>
+    <input type="file" id="opinia-image" accept="image/*" multiple>
+    <button id="wyslij-opinie">Wyślij</button>
+</div>
             
             
         
@@ -123,19 +123,13 @@
             </div>
         </section>
 
-        <section id="map">
+        <section class="location">
             <h2>Nasza lokalizacja</h2>
-            <p>Odwiedź nas osobiście! Znajdziesz nas tutaj:</p>
-            <div class="map-container">
-                <iframe 
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d25489.03878305393!2d22.41609941743249!3d49.292648808949234!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x473c953e4a5a2d7b%3A0x5f2d4d5e2b0e7c71!2sBieszczady!5e0!3m2!1spl!2spl!4v1707254769184" 
-                    width="100%" 
-                    height="400" 
-                    style="border:0;" 
-                    allowfullscreen="" 
-                    loading="lazy">
-                </iframe>
-            </div>
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d25489.03878305393!2d22.41609941743249!3d49.292648808949234!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x473c953e4a5a2d7b%3A0x5f2d4d5e2b0e7c71!2sBieszczady!5e0!3m2!1spl!2spl!4v1707254769184" 
+                width="100%" height="400" style="border:0;" allowfullscreen="" loading="lazy">
+            </iframe>
+            <br>
+            <a href="https://www.google.com/maps/dir//Bieszczady" target="_blank" class="map-button">Jak dojechać</a>
         </section>
     </main>
     
@@ -149,7 +143,12 @@
             </div>
             <div class="footer-section">
                 <h3>Media Społecznościowe</h3>
-                <p><a href="https://www.facebook.com/">Facebook</a> | <a href="#">Instagram</a> | <a href="#">Twitter</a></p>
+                <div class="social-icons">
+                    <!-- Ikony z Font Awesome -->
+                    <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i></a>
+                    <a href="https://twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
+                    <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
+                </div>
             </div>
             <div class="footer-section">
                 <h3>Godziny otwarcia</h3>

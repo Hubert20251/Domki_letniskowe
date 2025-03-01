@@ -10,13 +10,19 @@
     <header>
         <h1>Panel Administratora</h1>
         <nav>
-            <ul>
+            <div class="menu-toggle" onclick="toggleMenu()">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+            <ul class="nav-links"> <!-- Upewnij się, że ta klasa istnieje -->
                 <li><a href="index.html">Home</a></li>
                 <li><a href="admin.html">Zarządzaj Rezerwacjami</a></li>
                 <li><a href="zarzadzaj_wiadomosciami.html">Zarządzaj Wiadomościami</a></li>
                 <li><a href="zarzadzaj_ofertami.html">Zarządzaj Ofertami</a></li>
                 <li><a href="zarzadzaj_uzytkownikami.html">Zarządzaj Użytkownikami</a></li>
                 <li><a href="zarzadzaj_opiniami.html">Zarządzaj Opiniami</a></li>
+                <li><a href="potencjalny_dochod.html">Zarządzaj Dochodami</a></li>
             </ul>
         </nav>
     </header>
@@ -107,6 +113,15 @@
     } catch (error) {
         console.error("❌ Błąd sprawdzania sesji:", error);
         return { loggedIn: false };
+    }
+}
+
+function toggleMenu() {
+    const menu = document.querySelector(".nav-links");
+    if (menu) {
+        menu.classList.toggle("active");
+    } else {
+        console.error("Element .nav-links nie został znaleziony!");
     }
 }
 

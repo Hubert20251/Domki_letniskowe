@@ -143,3 +143,28 @@
 .opinia-img:hover {
     transform: scale(1.1);
 }
+
+
+#pokaz-formularz-opinii {
+    background-color: #0059ff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    display: block;
+    margin: 20px auto;
+}
+
+#pokaz-formularz-opinii:hover {
+    background-color: #0077e6;
+    transform: scale(1.05);
+}
+
+#pokaz-formularz-opinii:active {
+    background-color: #005fcc;
+    transform: scale(1);
+}

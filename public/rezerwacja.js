@@ -3,10 +3,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     await checkSession();
 });
 
+function showToast(message, type = "info") {
+    const toastContainer = document.getElementById("toast-container") || createToastContainer();
+    const toast = document.createElement("div");
+    toast.classList.add("toast", type);
+    toast.textContent = message;
+    toastContainer.appendChild(toast);
+    setTimeout(() => { toast.remove(); }, 3000);
+}
+
+function createToastContainer() {
+    const container = document.createElement("div");
+    container.id = "toast-container";
+    document.body.appendChild(container);
+    return container;
+}
+
 async function fetchHouses() {
     const user = await checkSession();
     const container = document.getElementById("houses-list");
-
     if (!container) {
         console.error("Błąd: Nie znaleziono elementu #houses-list. Sprawdź HTML.");
         return;
@@ -15,9 +30,7 @@ async function fetchHouses() {
     try {
         const response = await fetch("http://localhost:3000/api/houses");
         const data = await response.json();
-
         const uniqueHouses = [...new Map(data.map(house => [house.id, house])).values()];
-
         container.innerHTML = "";
 
         uniqueHouses.forEach(house => {
@@ -25,31 +38,24 @@ async function fetchHouses() {
             houseDiv.classList.add("house");
             houseDiv.setAttribute("data-house-id", house.id);
 
-            let buttonHTML = "";
-            if (!user || !user.loggedIn) {
-                buttonHTML = `<p class="login-message">Zaloguj się, aby zarezerwować</p>`;
-            } else {
-                buttonHTML = `<button class="reserve-button" data-house-id="${house.id}">Zarezerwuj</button>`;
-            }
+            let buttonHTML = user && user.loggedIn
+                ? `<button class="reserve-button" data-house-id="${house.id}">Zarezerwuj</button>`
+                : `<p class="login-message">Zaloguj się, aby zarezerwować</p>`;
 
             houseDiv.innerHTML = `
-    <img src="${house.image_url ? house.image_url : 'zdjecia/domek.jpg'}" 
-         alt="${house.name}" 
-         onerror="this.src='zdjecia/domek.jpg';">
-    <h2>${house.name}</h2>
-    <p>${house.description}</p>
-    <p class="price"><strong>Cena:</strong> ${house.price} PLN/noc</p>
-    ${buttonHTML}
-`;
-
-
+                <img src="${house.image_url || 'zdjecia/domek.jpg'}" alt="${house.name}" onerror="this.src='zdjecia/domek.jpg';">
+                <h2>${house.name}</h2>
+                <p>${house.description}</p>
+                <p class="price"><strong>Cena:</strong> ${house.price} PLN/noc</p>
+                ${buttonHTML}
+            `;
             container.appendChild(houseDiv);
         });
 
         document.querySelectorAll(".reserve-button").forEach(button => {
             button.addEventListener("click", (event) => {
                 if (!user || !user.loggedIn) {
-                    alert("Musisz być zalogowany, aby dokonać rezerwacji!");
+                    showToast("Musisz być zalogowany, aby dokonać rezerwacji!", "error");
                     return;
                 }
                 const houseId = event.target.getAttribute("data-house-id");
@@ -71,17 +77,15 @@ async function makeReservation(houseId, user_name, user_email, phone, dateFrom, 
         });
 
         const data = await response.json();
-
         if (response.ok) {
-            alert("✅ Rezerwacja udana!");
+            showToast("✅ Rezerwacja udana!", "success");
             await fetchHouses();
         } else {
-            alert("❌ Nie można zarezerwować: " + data.message);
+            showToast("❌ Nie można zarezerwować: " + data.message, "error");
         }
-        
     } catch (error) {
         console.error("❌ Błąd połączenia z serwerem:", error);
-        alert("Nie udało się połączyć z serwerem. Spróbuj ponownie później.");
+        showToast("Nie udało się połączyć z serwerem. Spróbuj ponownie później.", "error");
     }
 }
 
@@ -154,14 +158,18 @@ async function showReservationForm(houseId) {
         const dateTo = document.getElementById("dateTo").value;
         const phone = document.getElementById("phone").value.trim();
         const amount = document.getElementById("amount").value.trim();
+        
         if (!houseId || !user_name || !user_email || !phone || !dateFrom || !dateTo || !amount) {
-            alert("Proszę wypełnić wszystkie pola formularza.");
+            showToast("Proszę wypełnić wszystkie pola formularza.", "error");
             return;
         }
+        
         makeReservation(houseId, user_name, user_email, phone, dateFrom, dateTo, amount);
         closeForm(reservationForm, overlay);
     });
+    
     document.getElementById("closeModal").addEventListener("click", () => closeForm(reservationForm, overlay));
+    
 }
 
 function closeForm(form, overlay) {

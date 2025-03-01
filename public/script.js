@@ -37,6 +37,24 @@ async function checkSession() {
 }
 
 
+document.addEventListener("DOMContentLoaded", () => {
+    // Obsługa Entera w formularzu rejestracji
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+            const registerModal = document.querySelector(".modal h2");
+            if (registerModal && registerModal.innerText === "Rejestracja") {
+                event.preventDefault(); // Zapobiega domyślnemu zachowaniu Entera
+                document.getElementById("confirmRegister").click();
+            }
+            
+            const loginModal = document.querySelector(".modal h2");
+            if (loginModal && loginModal.innerText === "Logowanie") {
+                event.preventDefault();
+                document.getElementById("confirmLogin").click();
+            }
+        }
+    });
+});
 
 
 
@@ -78,18 +96,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 document.addEventListener("DOMContentLoaded", async () => {
     await checkSession();
 });
-
-
-// Uruchomienie sprawdzenia sesji po załadowaniu strony
-document.addEventListener("DOMContentLoaded", async () => {
-    await checkSession();
-});
-
-
-
-
-
-
 
 
 
@@ -185,12 +191,12 @@ function registerUser() {
     .then(data => {
         console.log("📥 Odpowiedź serwera:", data);
         if (data.success) {
-            alert("✅ Rejestracja udana! Możesz się teraz zalogować.");
+            showToast("✅ Rejestracja udana! Możesz się teraz zalogować.", "success");
             nameField.value = "";
             emailField.value = "";
             passwordField.value = "";
         } else {
-            alert("⚠ Błąd rejestracji: " + data.message);
+            showToast("⚠ Błąd rejestracji: " + data.message, "error");
         }
     })
     .catch(error => {
@@ -199,6 +205,10 @@ function registerUser() {
     });
 }
 
+function closeForm(form, overlay) {
+    document.body.removeChild(form);
+    document.body.removeChild(overlay);
+}
 
 
 // Logowanie użytkownika
@@ -259,7 +269,7 @@ async function loginUser(email, password) {
     const data = await response.json();
 
     if (data.success) {
-        alert("Zalogowano!");
+        showToast("Zalogowano pomyślnie!", "success");
         
         // Aktualizacja sesji
         const sessionData = await checkSession();
@@ -269,7 +279,7 @@ async function loginUser(email, password) {
 
         await fetchHouses(); // Ponowne załadowanie domków, by odblokować przyciski
     } else {
-        alert("Błąd logowania: " + data.message);
+        showToast("Błąd logowania: " + data.message, "error");
     }
 }
 
@@ -309,13 +319,14 @@ function updateUI(data) {
 
 
 
-// Wylogowanie użytkownika
 document.getElementById('logoutButton').addEventListener('click', async () => {
     await fetch('http://localhost:3000/api/logout', { method: 'POST' });
-    alert("Wylogowano!");
+    
     await checkSession();
     await fetchHouses(); // Odświeżenie przycisków po wylogowaniu
+    location.reload(); // Wymuszone odświeżenie strony
 });
+
 
 
 
@@ -357,158 +368,20 @@ async function checkSession() {
 }
 
 
-let selectedRating = 0;
 
-document.addEventListener("DOMContentLoaded", async () => {
-    const sessionData = await checkSession();
-    if (sessionData.loggedIn) {
-        document.getElementById("dodaj-opinie").style.display = "block";
-    }
-    pobierzOpinie();
-    pobierzSredniaOcene();
 
-    document.querySelectorAll(".star").forEach(star => {
-        star.addEventListener("mouseover", highlightStars);
-        star.addEventListener("mouseout", resetStars);
-        star.addEventListener("click", selectStar);
-    });
 
-    // Obsługa zamykania modala po kliknięciu w tło
-    document.getElementById("image-modal").addEventListener("click", closeModal);
-});
 
-function highlightStars(event) {
-    const value = event.target.getAttribute("data-value");
-    document.querySelectorAll(".star").forEach(star => {
-        star.style.color = star.getAttribute("data-value") <= value ? "gold" : "gray";
-    });
+function showToast(message, type = "info") {
+    const toastContainer = document.getElementById("toast-container");
+    const toast = document.createElement("div");
+    toast.classList.add("toast", type);
+    toast.innerText = message;
+
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.opacity = "0";
+        setTimeout(() => toast.remove(), 500);
+    }, 3000);
 }
-
-function resetStars() {
-    document.querySelectorAll(".star").forEach(star => {
-        star.style.color = star.getAttribute("data-value") <= selectedRating ? "gold" : "gray";
-    });
-}
-
-function selectStar(event) {
-    selectedRating = event.target.getAttribute("data-value");
-    resetStars();
-}
-
-async function pobierzOpinie() {
-    const response = await fetch("http://localhost:3000/api/opinie");
-    const opinie = await response.json();
-    const opinieLista = document.getElementById("opinie-lista");
-    opinieLista.innerHTML = "";
-
-    opinie.forEach(opinia => {
-        const opiniaDiv = document.createElement("div");
-        opiniaDiv.classList.add("opinia");
-
-        const dataDodania = new Date(opinia.created_at);
-        const sformatowanaData = dataDodania.toLocaleDateString("pl-PL", {
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit"
-        });
-
-        // Poprawiona obsługa obrazów
-        let imagesHTML = "";
-        if (opinia.image_url) {
-            let images;
-            try {
-                images = JSON.parse(opinia.image_url); // Próbujemy sparsować JSON
-                if (!Array.isArray(images)) {
-                    images = [images]; // Jeśli to nie tablica, robimy z tego tablicę
-                }
-            } catch (error) {
-                images = [opinia.image_url]; // Jeśli parsowanie się nie powiedzie, traktujemy jako pojedynczy URL
-            }
-
-            imagesHTML = images.map(img => `<img src="${img}" class="opinia-img" onclick="openModal('${img}')">`).join("");
-        }
-
-        opiniaDiv.innerHTML = `
-            <p><strong>${opinia.user_name}</strong>: ${opinia.content} (${opinia.rating} ★)</p>
-            <p class="opinia-data">📅 Dodano: ${sformatowanaData}</p>
-            ${imagesHTML}
-        `;
-        opinieLista.appendChild(opiniaDiv);
-    });
-}
-
-
-
-// Powiększanie zdjęć w popupie
-function openModal(imageUrl) {
-    const modal = document.getElementById("image-modal");
-    const modalImg = document.getElementById("modal-image");
-    modal.style.display = "block";
-    modalImg.src = imageUrl;
-}
-
-// Zamknięcie modala
-function closeModal() {
-    document.getElementById("image-modal").style.display = "none";
-}
-
-async function pobierzSredniaOcene() {
-    const response = await fetch("http://localhost:3000/api/opinie/srednia");
-    const data = await response.json();
-    const sredniaOcena = (typeof data.srednia === "number" && !isNaN(data.srednia)) ? data.srednia : 0;
-    document.getElementById("avg-rating").innerText = sredniaOcena.toFixed(1);
-}
-
-// Dodanie modala do HTML
-document.body.insertAdjacentHTML('beforeend', `
-    <div id="image-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); text-align:center; z-index:1000;">
-        <span onclick="closeModal()" style="position:absolute; top:20px; right:35px; color:white; font-size:40px; font-weight:bold; cursor:pointer;">&times;</span>
-        <img id="modal-image" style="max-width:90%; max-height:90vh; margin-top:50px; border-radius:10px;">
-    </div>
-`);
-
-
-
-document.getElementById("wyslij-opinie").addEventListener("click", async () => {
-    const opiniaText = document.getElementById("opinia-text").value.trim();
-    const opiniaImages = document.getElementById("opinia-image").files;
-
-    if (!opiniaText || selectedRating === 0) {
-        return alert("Wpisz treść opinii i wybierz ocenę!");
-    }
-
-    const sessionData = await checkSession();
-    if (!sessionData.loggedIn) {
-        return alert("Musisz być zalogowany, aby dodać opinię!");
-    }
-
-    const formData = new FormData();
-    formData.append("content", opiniaText);
-    formData.append("rating", selectedRating);
-    formData.append("user_name", sessionData.name);
-
-    for (const file of opiniaImages) {
-        formData.append("images", file);
-    }
-
-    const response = await fetch("http://localhost:3000/api/opinie", {
-        method: "POST",
-        body: formData
-    });
-
-    const data = await response.json();
-    if (data.success) {
-        document.getElementById("opinia-text").value = "";
-        document.getElementById("opinia-image").value = "";
-        selectedRating = 0;
-        resetStars();
-        pobierzOpinie();
-    } else {
-        alert("Błąd podczas dodawania opinii!");
-    }
-});
-
-
-

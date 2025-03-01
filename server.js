@@ -114,7 +114,12 @@ app.post('/api/login', (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(401).json({ message: "Nieprawidłowy email lub hasło" });
 
-        const token = jwt.sign({ id: user.id, role: user.role }, 'sekretnyklucz', { expiresIn: '1h' });
+        const token = jwt.sign(
+            { id: user.id, role: user.role, email: user.email }, 
+            'sekretnyklucz', 
+            { expiresIn: '1h' }
+        );
+        
 
         req.session.token = token;
         req.session.role = user.role;
@@ -245,7 +250,7 @@ app.get('/api/houses', (req, res) => {
 app.get('/api/bookings', (req, res) => {
     const user_email = req.query.user_email;
     
-    let query = 'SELECT house_id, user_name, phone, amount, date_from, date_to FROM bookings';
+    let query = 'SELECT id, house_id, user_name, phone, amount, date_from, date_to FROM bookings';
     let params = [];
 
     if (user_email) {
@@ -259,10 +264,11 @@ app.get('/api/bookings', (req, res) => {
             return res.status(500).send("Błąd serwera");
         }
 
-        console.log("📄 Pobranie rezerwacji", user_email ? `dla użytkownika: ${user_email}` : "dla wszystkich", results);
+        console.log("📄 Pobranie rezerwacji:", results);
         res.json(results);
     });
 });
+
 
 
 
@@ -833,6 +839,61 @@ app.delete("/api/admin/opinie/:id", (req, res) => {
         });
     });
 });
+
+
+// 📌 Usuwanie rezerwacji przez użytkownika
+app.delete('/api/bookings/:id', (req, res) => {
+    if (!req.session.token) {
+        console.log("❌ Brak tokena w sesji!");
+        return res.status(403).json({ message: "Brak autoryzacji" });
+    }
+
+    jwt.verify(req.session.token, 'sekretnyklucz', (err, decoded) => {
+        if (err) {
+            console.log("❌ Błąd dekodowania tokena JWT:", err);
+            return res.status(403).json({ message: "Brak dostępu" });
+        }
+
+        console.log("🔍 Odczytany token JWT:", decoded);
+
+        const bookingId = req.params.id;
+        if (!bookingId) {
+            return res.status(400).json({ message: "Brak ID rezerwacji" });
+        }
+
+        const userEmail = decoded.email;
+        console.log(`🔍 Sprawdzam rezerwację ID: ${bookingId} dla użytkownika: ${userEmail}`);
+
+        db.query('SELECT * FROM bookings WHERE id = ?', [bookingId], (err, results) => {
+            if (err) {
+                console.error("❌ Błąd pobierania rezerwacji:", err);
+                return res.status(500).json({ message: "Błąd serwera" });
+            }
+
+            console.log("📄 Wynik zapytania:", results);
+
+            if (results.length === 0) {
+                return res.status(404).json({ message: "Rezerwacja nie istnieje" });
+            }
+
+            if (results[0].user_email !== userEmail) {
+                console.log(`⛔ Użytkownik ${userEmail} nie ma uprawnień do usunięcia tej rezerwacji.`);
+                return res.status(403).json({ message: "Nie możesz usunąć tej rezerwacji" });
+            }
+
+            db.query('DELETE FROM bookings WHERE id = ?', [bookingId], (err) => {
+                if (err) {
+                    console.error("❌ Błąd usuwania rezerwacji:", err);
+                    return res.status(500).json({ message: "Błąd serwera" });
+                }
+                res.json({ success: true, message: "🗑️ Rezerwacja usunięta!" });
+            });
+        });
+    });
+});
+
+
+
 
 
 

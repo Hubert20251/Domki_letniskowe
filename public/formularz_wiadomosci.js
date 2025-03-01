@@ -5,11 +5,16 @@ document.addEventListener("DOMContentLoaded", function() {
     form.addEventListener("submit", async function(event) {
         event.preventDefault();
 
-        const formData = {
-            name: document.getElementById("name").value,
-            email: document.getElementById("email").value,
-            message: document.getElementById("message").value
-        };
+        const name = document.getElementById("name").value.trim();
+        const email = document.getElementById("contactEmail").value.trim();
+        const message = document.getElementById("message").value.trim();
+
+        if (!name || !email || !message) {
+            showToast("Wszystkie pola są wymagane!", "error");
+            return;
+        }
+
+        const formData = { name, email, message };
 
         try {
             const response = await fetch("http://localhost:3000/submit", {
@@ -19,10 +24,12 @@ document.addEventListener("DOMContentLoaded", function() {
             });
 
             const result = await response.text();
-            alert(result); // Pokaż komunikat od serwera
+            showToast(result, "success"); // Pokaż komunikat od serwera
+
+            form.reset(); // Wyczyść formularz po wysłaniu
         } catch (error) {
             console.error("Błąd wysyłania formularza:", error);
-            alert("Wystąpił problem. Spróbuj ponownie.");
+            showToast("Wystąpił problem. Spróbuj ponownie.", "error");
         }
     });
 });

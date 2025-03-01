@@ -13,6 +13,11 @@
     <header>
         <h1>Moje Rezerwacje</h1>
         <nav class="navbar">
+            <div class="menu-toggle" onclick="toggleMenu()">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
             <ul>
                 <li><a href="index.html">Home</a></li>
                 <li><a href="oferta.html">Oferta</a></li>
@@ -26,7 +31,14 @@
 
     <main>
         
-
+        <div id="confirm-modal" class="modal1">
+            <div class="modal-content">
+                <p id="confirm-message">Czy na pewno chcesz anulować tę rezerwację?</p>
+                <button id="confirm-yes">Tak</button>
+                <button id="confirm-no">Nie</button>
+            </div>
+        </div>
+        
 
 
 
@@ -35,85 +47,160 @@
             Twoje rezerwacje
         </div>
         <div id="reservation-list">Ładowanie...</div>
+
+        
     </main>
 
     <script>
         document.addEventListener("DOMContentLoaded", async () => {
-    console.log("🔵 Skrypt rezerwacji działa.");
+            console.log("🔵 Skrypt rezerwacji działa.");
 
-    const user = await checkSession();
-    if (!user.loggedIn) {
-        alert("Musisz być zalogowany.");
-        window.location.href = "index.html";
-        return;
-    }
+            const user = await checkSession();
+            if (!user.loggedIn) {
+                alert("Musisz być zalogowany.");
+                window.location.href = "index.html";
+                return;
+            }
 
-    console.log("👤 Zalogowany użytkownik:", user.email);
+            console.log("👤 Zalogowany użytkownik:", user.email);
 
-    const list = document.getElementById("reservation-list");
-    if (!list) {
-        console.error("❌ Brak elementu #reservation-list w HTML.");
-        return;
-    }
+            const list = document.getElementById("reservation-list");
+            if (!list) {
+                console.error("❌ Brak elementu #reservation-list w HTML.");
+                return;
+            }
 
-    list.innerHTML = "Ładowanie rezerwacji...";
+            list.innerHTML = "Ładowanie rezerwacji...";
 
-    try {
-        const response = await fetch(`http://localhost:3000/api/bookings?user_email=${user.email}`);
-        const data = await response.json();
+            try {
+                const response = await fetch(`http://localhost:3000/api/bookings?user_email=${user.email}`);
+                const data = await response.json();
 
-        console.log("📄 Otrzymane dane z API:", data);
+                console.log("📄 Otrzymane dane z API:", data);
 
-        if (data.length === 0) {
-            list.innerHTML = "<p>Brak rezerwacji.</p>";
-            return;
-        }
+                if (data.length === 0) {
+                    list.innerHTML = "<p>Brak rezerwacji.</p>";
+                    return;
+                }
 
-        list.innerHTML = ""; // Wyczyść listę
-        data.forEach(reservation => {
-            const div = document.createElement("div");
-            div.classList.add("reservation-item");
+                list.innerHTML = ""; 
+                data.forEach(reservation => {
+                    const div = document.createElement("div");
+                    div.classList.add("reservation-item");
 
-            div.innerHTML = `
-                <p><strong>Imię i nazwisko:</strong> ${reservation.user_name}</p>
-                <p><strong>Domek:</strong> ${reservation.house_id}</p>
-                <p><strong>Data od:</strong> ${reservation.date_from}</p>
-                <p><strong>Data do:</strong> ${reservation.date_to}</p>
-                <p><strong>Numer telefonu:</strong> ${reservation.phone ? reservation.phone : 'Brak danych'}</p>
-                <p><strong>Kwota:</strong> ${reservation.amount ? reservation.amount + ' PLN' : 'Brak danych'}</p>
-                <button class="pdf-button" data-id="${reservation.house_id}" 
-                        data-name="${reservation.user_name}" 
-                        data-datefrom="${reservation.date_from}" 
-                        data-dateto="${reservation.date_to}" 
-                        data-phone="${reservation.phone}" 
-                        data-amount="${reservation.amount}">
-                    📄 Pobierz potwierdzenie PDF
-                </button>
-                <hr>
-            `;
-            list.appendChild(div);
-        });
-
-        // Obsługa generowania PDF dla każdej rezerwacji
-        document.querySelectorAll(".pdf-button").forEach(button => {
-            button.addEventListener("click", (event) => {
-                const target = event.target;
-                generatePDF({
-                    house_id: target.dataset.id,
-                    user_name: target.dataset.name,
-                    date_from: target.dataset.datefrom,
-                    date_to: target.dataset.dateto,
-                    phone: target.dataset.phone,
-                    amount: target.dataset.amount
+                    div.innerHTML = `
+                        <p><strong>Imię i nazwisko:</strong> ${reservation.user_name}</p>
+                        <p><strong>Domek:</strong> ${reservation.house_id}</p>
+                        <p><strong>Data od:</strong> ${reservation.date_from}</p>
+                        <p><strong>Data do:</strong> ${reservation.date_to}</p>
+                        <p><strong>Numer telefonu:</strong> ${reservation.phone ? reservation.phone : 'Brak danych'}</p>
+                        <p><strong>Kwota:</strong> ${reservation.amount ? reservation.amount + ' PLN' : 'Brak danych'}</p>
+                        <button class="pdf-button" data-id="${reservation.house_id}" 
+                                data-name="${reservation.user_name}" 
+                                data-datefrom="${reservation.date_from}" 
+                                data-dateto="${reservation.date_to}" 
+                                data-phone="${reservation.phone}" 
+                                data-amount="${reservation.amount}">
+                            📄 Pobierz potwierdzenie PDF
+                        </button>
+                        <button class="cancel-button" data-id="${reservation.id}">❌ Anuluj rezerwację</button>
+                        <hr>
+                    `;
+                    list.appendChild(div);
                 });
-            });
+
+                document.querySelectorAll(".cancel-button").forEach(button => {
+    button.addEventListener("click", async (event) => {
+        const reservationId = event.target.dataset.id;
+        showToast("Anulowanie rezerwacji...", "info");
+        await cancelReservation(reservationId);
+    });
+});
+
+} catch (error) {
+    console.error("❌ Błąd ładowania rezerwacji:", error);
+    list.innerHTML = "<p>Błąd ładowania danych.</p>";
+    showToast("Błąd ładowania rezerwacji.", "error");
+}
         });
 
+        function showToast(message, type = "info") {
+    const container = document.getElementById("toast-container") || createToastContainer();
+    const toast = document.createElement("div");
+    toast.classList.add("toast", type);
+    toast.innerText = message;
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.opacity = "0";
+        setTimeout(() => toast.remove(), 500);
+    }, 3000);
+}
+
+function createToastContainer() {
+    const container = document.createElement("div");
+    container.id = "toast-container";
+    document.body.appendChild(container);
+    return container;
+}
+
+function showConfirmModal(message) {
+    return new Promise((resolve) => {
+        const modal = document.getElementById("confirm-modal");
+        const confirmMessage = document.getElementById("confirm-message");
+        const confirmYes = document.getElementById("confirm-yes");
+        const confirmNo = document.getElementById("confirm-no");
+
+        confirmMessage.innerText = message;
+        modal.style.display = "flex";
+
+        confirmYes.onclick = () => {
+            modal.style.display = "none";
+            resolve(true);
+        };
+        confirmNo.onclick = () => {
+            modal.style.display = "none";
+            resolve(false);
+        };
+    });
+}
+
+async function cancelReservation(reservationId) {
+    console.log("🗑️ Próba anulowania rezerwacji o ID:", reservationId);
+    
+    const confirmed = await showConfirmModal("Czy na pewno chcesz anulować tę rezerwację?");
+    if (!confirmed) return;
+    
+    try {
+        const response = await fetch(`http://localhost:3000/api/bookings/${reservationId}`, {
+            method: "DELETE",
+            credentials: "include"
+        });
+
+        const result = await response.json();
+        console.log("📡 Odpowiedź API:", result);
+
+        if (result.success) {
+            showToast("Rezerwacja została anulowana!", "success");
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showToast(`Błąd: ${result.message}`, "error");
+        }
     } catch (error) {
-        console.error("❌ Błąd ładowania rezerwacji:", error);
-        list.innerHTML = "<p>Błąd ładowania danych.</p>";
+        console.error("❌ Błąd anulowania rezerwacji:", error);
+        showToast("Nie udało się anulować rezerwacji.", "error");
     }
-});
+}
+
+
+
+
+
+
+
+        
+    
+
 
 
         async function checkSession() {
@@ -183,7 +270,12 @@
 
 
 
-
+function toggleMenu() {
+    const menu = document.querySelector(".navbar ul");
+    const toggle = document.querySelector(".menu-toggle");
+    menu.classList.toggle("active");
+    toggle.classList.toggle("open");
+}
 
     </script>
 </body>
