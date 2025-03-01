@@ -251,26 +251,7 @@ nav {
 }
 
 
-@media (max-width: 768px) {
-    #auth-section {
-        text-align: center;
-        width: 100%;
-    }
 
-    #auth-section button {
-        width: 90%;
-        padding: 14px;
-        font-size: 16px;
-    }
-}
-
-@media (max-width: 480px) {
-    #auth-section button {
-        width: 100%;
-        font-size: 14px;
-        padding: 12px;
-    }
-}
 
 
 
