@@ -34,10 +34,8 @@ const upload = multer({ storage: storage });
 
 // Konfiguracja połączenia z bazą danych MySQL
 const db = mysql.createConnection({
-    host: process.env.DB_HOST,  
-    user: process.env.DB_USER,        
-    password: process.env.DB_PASSWORD,        
-    database: process.env.DB_NAME 
+   
+    
 });
 
 // Sprawdzenie połączenia z bazą
