@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     await checkSession();
 });
 
-fetch("http://localhost:3000/api/session")
+fetch("https://domki-letniskowe-1.onrender.com/api/session")
     .then(res => res.json())
     .then(data => console.log("🛠 Odpowiedź serwera:", data));
 
@@ -25,7 +25,7 @@ function toggleVisibility(elementId) {
 
 async function checkSession() {
     try {
-        const response = await fetch("http://localhost:3000/api/session");
+        const response = await fetch("https://domki-letniskowe-1.onrender.com/api/session");
         const data = await response.json();
         console.log("👤 Zalogowany użytkownik:", data);
 
@@ -182,7 +182,7 @@ function registerUser() {
     const userData = { name, email, password };
     console.log("📤 Wysyłane dane do API:", userData);
 
-    fetch("http://localhost:3000/api/register", {
+    fetch("https://domki-letniskowe-1.onrender.com/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userData),
@@ -260,7 +260,7 @@ function showLoginForm() {
 }
 
 async function loginUser(email, password) {
-    const response = await fetch('http://localhost:3000/api/login', {
+    const response = await fetch('https://domki-letniskowe-1.onrender.com/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -320,7 +320,7 @@ function updateUI(data) {
 
 
 document.getElementById('logoutButton').addEventListener('click', async () => {
-    await fetch('http://localhost:3000/api/logout', { method: 'POST' });
+    await fetch('https://domki-letniskowe-1.onrender.com/api/logout', { method: 'POST' });
     
     await checkSession();
     await fetchHouses(); // Odświeżenie przycisków po wylogowaniu
@@ -341,7 +341,7 @@ function toggleMenu() {
 
 
 async function checkSession() {
-    const response = await fetch('http://localhost:3000/api/session');
+    const response = await fetch('https://domki-letniskowe-1.onrender.com/api/session');
     const data = await response.json();
 
     if (data.loggedIn) {
