@@ -341,7 +341,7 @@ function toggleMenu() {
 
 
 async function checkSession() {
-    const response = await fetch('http://localhost:3000/api/session');
+    const response = await fetch('https://domki-letniskowe-1.onrender.com/api/session');
     const data = await response.json();
 
     if (data.loggedIn) {
