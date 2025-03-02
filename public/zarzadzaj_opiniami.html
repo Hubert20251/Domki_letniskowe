@@ -59,7 +59,7 @@
         });
 
         async function loadOpinie() {
-            const response = await fetch("http://localhost:3000/api/admin/opinie", { credentials: "include" });
+            const response = await fetch("https://domki-letniskowe-1.onrender.com/api/admin/opinie", { credentials: "include" });
             const data = await response.json();
             
             const list = document.getElementById("opinie-list");
@@ -103,7 +103,7 @@
                 formData.append("images", file);
             }
 
-            await fetch(`http://localhost:3000/api/admin/opinie/${opiniaId}`, {
+            await fetch(`https://domki-letniskowe-1.onrender.com/api/admin/opinie/${opiniaId}`, {
                 method: "PUT",
                 body: formData
             });
@@ -115,7 +115,7 @@
 
         async function deleteOpinia(opiniaId) {
             if (!confirm("Czy na pewno chcesz usunąć tę opinię?")) return;
-            await fetch(`http://localhost:3000/api/admin/opinie/${opiniaId}`, { method: "DELETE" });
+            await fetch(`https://domki-letniskowe-1.onrender.com/api/admin/opinie/${opiniaId}`, { method: "DELETE" });
             alert("Opinia usunięta!");
             loadOpinie();
         }
