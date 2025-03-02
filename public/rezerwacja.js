@@ -28,7 +28,7 @@ async function fetchHouses() {
     }
 
     try {
-        const response = await fetch("https://domki-letniskowe-1.onrender.com//api/houses");
+        const response = await fetch("https://domki-letniskowe-1.onrender.com/api/houses");
         const data = await response.json();
         const uniqueHouses = [...new Map(data.map(house => [house.id, house])).values()];
         container.innerHTML = "";
