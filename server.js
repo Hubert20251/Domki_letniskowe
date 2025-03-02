@@ -907,7 +907,7 @@ app.delete('/api/bookings/:id', (req, res) => {
 
 // 📌 Uruchomienie serwera
 app.listen(3000, () => {
-    console.log('🚀 Serwer działa na https://domki-letniskowe-1.onrender.com');
+    console.log('🚀 Serwer działa na https://domki-letniskowe.onrender.com');
 });
 
 
