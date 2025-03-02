@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const formData = { name, email, message };
 
         try {
-            const response = await fetch("http://localhost:3000/submit", {
+            const response = await fetch("https://domki-letniskowe-1.onrender.com/submit", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData)
