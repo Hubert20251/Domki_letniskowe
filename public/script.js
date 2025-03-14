@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     await checkSession();
 });
 
-fetch("https://domki-letniskowe-1.onrender.com/api/session")
+fetch("https://domki-letniskowe.onrender.com/api/session")
     .then(res => res.json())
     .then(data => console.log("🛠 Odpowiedź serwera:", data));
 
@@ -320,7 +320,7 @@ function updateUI(data) {
 
 
 document.getElementById('logoutButton').addEventListener('click', async () => {
-    await fetch('https://domki-letniskowe-1.onrender.com/api/logout', { method: 'POST' });
+    await fetch('https://domki-letniskowe.onrender.com/api/logout', { method: 'POST' });
     
     await checkSession();
     await fetchHouses(); // Odświeżenie przycisków po wylogowaniu
