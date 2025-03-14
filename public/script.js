@@ -25,7 +25,7 @@ function toggleVisibility(elementId) {
 
 async function checkSession() {
     try {
-        const response = await fetch("https://domki-letniskowe-1.onrender.com/api/session");
+        const response = await fetch("https://domki-letniskowe.onrender.com/api/session");
         const data = await response.json();
         console.log("👤 Zalogowany użytkownik:", data);
 
@@ -182,7 +182,7 @@ function registerUser() {
     const userData = { name, email, password };
     console.log("📤 Wysyłane dane do API:", userData);
 
-    fetch("https://domki-letniskowe-1.onrender.com/api/register", {
+    fetch("https://domki-letniskowe.onrender.com/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userData),
@@ -260,7 +260,7 @@ function showLoginForm() {
 }
 
 async function loginUser(email, password) {
-    const response = await fetch('https://domki-letniskowe-1.onrender.com/api/login', {
+    const response = await fetch('https://domki-letniskowe.onrender.com/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -341,7 +341,7 @@ function toggleMenu() {
 
 
 async function checkSession() {
-    const response = await fetch('https://domki-letniskowe-1.onrender.com/api/session');
+    const response = await fetch('https://domki-letniskowe.onrender.com/api/session');
     const data = await response.json();
 
     if (data.loggedIn) {
