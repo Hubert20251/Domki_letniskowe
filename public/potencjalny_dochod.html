@@ -103,116 +103,11 @@
     </main>
     
     <script>
-        <!DOCTYPE html>
-<html lang="pl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Potencjalny Dochód</title>
-    <link rel="stylesheet" href="admin.css">
-    <!DOCTYPE html>
-<html lang="pl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Potencjalny Dochód</title>
-    <link rel="stylesheet" href="admin.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-            text-align: center;
-        }
-        header {
-            background-color: #333;
-            color: white;
-            padding: 15px;
-        }
-        nav ul {
-            list-style: none;
-            padding: 0;
-        }
-        nav ul li {
-            display: inline;
-            margin: 0 15px;
-        }
-        nav ul li a {
-            color: white;
-            text-decoration: none;
-        }
-        main {
-            margin: 20px auto;
-            max-width: 800px;
-            background: white;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-        th, td {
-            padding: 10px;
-            text-align: center;
-        }
-        th {
-            background-color: #333;
-            color: white;
-        }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <h1>Panel Administratora</h1>
-        <nav>
-            <div class="menu-toggle" onclick="toggleMenu()">
-                <div></div>
-                <div></div>
-                <div></div>
-            </div>
-            <ul class="nav-links"> <!-- Upewnij się, że ta klasa istnieje -->
-                <li><a href="index.html">Home</a></li>
-                <li><a href="admin.html">Zarządzaj Rezerwacjami</a></li>
-                <li><a href="zarzadzaj_wiadomosciami.html">Zarządzaj Wiadomościami</a></li>
-                <li><a href="zarzadzaj_ofertami.html">Zarządzaj Ofertami</a></li>
-                <li><a href="zarzadzaj_uzytkownikami.html">Zarządzaj Użytkownikami</a></li>
-                <li><a href="zarzadzaj_opiniami.html">Zarządzaj Opiniami</a></li>
-                <li><a href="potencjalny_dochod.html">Zarządzaj Dochodami</a></li>
-            </ul>
-        </nav>
-    </header>
-    
-    <main>
-        <h2>Przychody z rezerwacji</h2>
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>Miesiąc</th>
-                    <th>Łączny dochód (PLN)</th>
-                </tr>
-            </thead>
-            <tbody id="income-table">
-                <tr><td colspan="2">Ładowanie danych...</td></tr>
-            </tbody>
-        </table>
-    </main>
-    
-    <script>
         document.addEventListener("DOMContentLoaded", async () => {
     const tableBody = document.getElementById("income-table");
 
     try {
-        const response = await fetch("http://domki-letniskowe.onrender.com/api/admin/bookings");
+        const response = await fetch("http://localhost:3000/api/admin/bookings");
         if (!response.ok) throw new Error("Błąd pobierania danych");
 
         const bookings = await response.json();
@@ -272,10 +167,6 @@ function toggleMenu() {
         console.error("Element .nav-links nie został znaleziony!");
     }
 }
-
- 
-
-
 
     </script>
 </body>
